@@ -1,0 +1,1 @@
+https://pt.stackoverflow.com/questions/263468/ajax-retornar-um-loop-de-resultados
