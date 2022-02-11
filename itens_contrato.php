@@ -8,7 +8,6 @@
 	
 	// Cria uma variável que terá os dados do erro	
 	$erro = false;	
-	
 
 	
 	// Verifica se o POST tem algum valor ou se o GET tem valor	
@@ -17,12 +16,17 @@
 					try {
 					
 
-					$sql = "DELETE FROM itens_contrato WHERE idItensContrato =  :id";
+					$sql = "DELETE FROM itens_contrato WHERE idEventos =  :id";
 					$stmt = $pdo->prepare($sql);
-					$stmt->bindParam(':idItensContrato', $_GET['id'], PDO::PARAM_INT);   
-					$stmt->execute();		
+					$stmt->bindParam(':id', $_GET['id'], PDO::PARAM_INT);   
+					$stmt->execute();	
 
-					echo "<script>location.href='listar_itens.php?status=Deletado com sucesso!';</script>";
+					$del = "DELETE FROM aparelhos_contrato WHERE idEventos =  :id";
+					$stmtdel = $pdo->prepare($del);
+					$stmtdel->bindParam(':id', $_GET['id'], PDO::PARAM_INT);   
+					$stmtdel->execute();		
+
+					echo "<script>location.href='listar_itens_contrato.php?status=Deletado com sucesso!';</script>";
 
 					
 				} catch (PDOException $e) {	
@@ -34,85 +38,94 @@
 			
 		}		
 		
+
 		
+		if(isset($_POST['acao']) && $_POST['acao'] == "editar"){
 		
-		if(isset($_POST['acao']) && $_POST['acao'] == "editar"){ 
-		
-		
-
-
-
-			if(empty($_POST['descricao'])){
-				$erro = "Informe a descrição de um item";
-			}	
-
-
-				// Se existir algum erro, mostra o erro	
-				if ( $erro ) {	
-					$erro;
-					$status = 0;
-					$retorno = array('erro'=>$erro, 'status'=>$status);										
-					echo json_encode($retorno, JSON_PRETTY_PRINT);			
-				} else {
+					$idEventos = filter_var(mb_strtoupper($_POST['idEventos'],'utf-8'));
+					$idAparelhos = filter_var(mb_strtoupper($_POST['idAparelhos'],'utf-8'));
+					$valorDiaria = filter_var(mb_strtoupper($_POST['valorDiaria'],'utf-8'));
 					
-				
-					// Se a variável $erro continuar com valor falso				
-					try {
+					$valorDiaria = preg_replace("/[^0-9]/", "", $valorDiaria); //retira tudo que não seja números
+					$valorDiaria = substr_replace($valorDiaria, '.', -2, 0); //acrescenta um ponto nos depois dos dois ultimos numeros da direita para esquerda
+					
+					
+					$idItens = $_POST['idItens']; // array
+					$qtde = $_POST['qtde']; // array
+					$count = count($idItens);
+					
+					
+					$sql = "UPDATE aparelhos_contrato SET
+								idAparelhos = :idAparelhos,
+								idEventos = :idEventos,
+								valorDiaria = :valorDiaria
+							WHERE idEventos = :idEventos
+						";
+					
+					
+					$stmt = $pdo->prepare($sql);			
+					$stmt->bindParam(':idAparelhos', $idAparelhos, PDO::PARAM_INT);		
+					$stmt->bindParam(':idEventos', $idEventos, PDO::PARAM_STR);		
+					$stmt->bindParam(':valorDiaria', $valorDiaria, PDO::PARAM_STR);		
+					$resAparelhosContrato = $stmt->execute();
+
+									
+					
+					if($resAparelhosContrato){
+						
+						$sql = "DELETE FROM itens_contrato WHERE idEventos =  :idEventos";
+						$stmt = $pdo->prepare($sql);
+						$stmt->bindParam(':idEventos', $idEventos, PDO::PARAM_INT);   
+						$deleteItensContrato = $stmt->execute();
 						
 							
-						
-						$idItens = filter_var($_POST['idItens']);
-						$descricao = filter_var($_POST['descricao']);
-						$padrao = filter_var($_POST['padrao']);
-						
-						$sql = "
-						
-						UPDATE itens SET
-							idItens = :idItens,
-							descricao = :descricao,
-							padrao = :padrao
-						WHERE idItens = :idItens
-						
-						";
-						
-						
-						$stmt = $pdo->prepare($sql);			
-						$stmt->bindParam(':idItens', $idItens, PDO::PARAM_INT);		
-						$stmt->bindParam(':descricao', $descricao, PDO::PARAM_STR);		
-						$stmt->bindParam(':padrao', $padrao, PDO::PARAM_INT);		
-						$ress = $stmt->execute();
-		
-								if($ress){	
-									$status = 1;	
-									$erro = "Item alterado com sucesso";
-								}else{
-									$status = 0;					
-									$erro = "Erro ao alterar item ";
-									return false;	
-								}				
+							if($deleteItensContrato){
+
+								for ($i=0;$i<$count;$i++){
+
+									$sql = "INSERT INTO itens_contrato (idItens, idEventos, qtde) VALUES (:idItens, :idEventos, :qtde)";			
+										$insert = $pdo->prepare($sql);			
+										$insert->bindParam(':idItens', $idItens[$i]);		
+										$insert->bindParam(':idEventos', $idEventos);		
+										$insert->bindParam(':qtde', $qtde[$i]);				
+										$ress = $insert->execute();
+										$lastIdCliente = $pdo->lastInsertId();	
+	
 										
 
-						$retorno = array('erro'=>$erro, 'status'=>$status);										
-						echo json_encode($retorno, JSON_PRETTY_PRINT);						
-							
-						//header('location: index.php');
+								}
+								
+								$erro = "Itens atualizados com sucesso!";
+								$status = 1;								
+								
+							}else{
+
+								$erro = "Erro nas transações de deletar os itens";
+								$status = 0;
+							}
 						
-					} catch (PDOException $e) {						
-							$status = 0;			
-							$erro = $e->getMessage();			
-							$retorno = array('erro'=>$erro, 'status'=>$status);			
-							echo json_encode($retorno, JSON_PRETTY_PRINT);					
-					}			
-				}//se não tiver erro
+						
+					}else{
+						
 
 
 
 
-			
-			
-				
-			
-			exit();	
+						$erro = "Erro nas transações";
+						$status = 0;
+						
+						
+						
+						
+					}
+					
+					$retorno = array('erro'=>$erro, 'status'=>$status);										
+					echo json_encode($retorno, JSON_PRETTY_PRINT);
+					
+					exit();
+					
+					
+
 			
 		}//altera cadastro
 
@@ -138,6 +151,10 @@
 			$idEventos = filter_var(mb_strtoupper($_POST['idEventos'],'utf-8'));
 			$idAparelhos = filter_var(mb_strtoupper($_POST['idAparelhos'],'utf-8'));
 			$valorDiaria = filter_var(mb_strtoupper($_POST['valorDiaria'],'utf-8'));
+			
+			$valorDiaria = preg_replace("/[^0-9]/", "", $valorDiaria); //retira tudo que não seja números
+			$valorDiaria = substr_replace($valorDiaria, '.', -2, 0); //acrescenta um ponto nos depois dos dois ultimos numeros da direita para esquerda
+			
 			
 			
 			$sql = "INSERT INTO aparelhos_contrato (idAparelhos, idEventos, valorDiaria) VALUES (:idAparelhos, :idEventos, :valorDiaria)";			
@@ -204,7 +221,7 @@
 									
 									
 									$status = 1;			
-									$erro = "Parece que um ou mais itens já foram adicionados a este evento. Eles não serão duplicados. Os novos itens serão adicionado normalmente. Caso queira mudar a quantidade de um item já inserido, utilize o formulário de edição de Itens do Contrato";			
+									$erro = "Parece que um ou mais itens já foram adicionados a este evento. Eles não serão duplicados. Os novos itens serão adicionado normalmente. Caso queira mudar a quantidade de um item já inserido, utilize o formulário de edição de Itens do Contrato.";			
 					
 
 								}

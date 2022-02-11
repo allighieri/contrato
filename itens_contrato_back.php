@@ -140,18 +140,13 @@
 			$valorDiaria = filter_var(mb_strtoupper($_POST['valorDiaria'],'utf-8'));
 			
 			
-
-
-			//$pdo->beginTransaction();/* Inicia a transação */  			
 			$sql = "INSERT INTO aparelhos_contrato (idAparelhos, idEventos, valorDiaria) VALUES (:idAparelhos, :idEventos, :valorDiaria)";			
 			$insert = $pdo->prepare($sql);			
 			$insert->bindParam(':idAparelhos', $idAparelhos);		
 			$insert->bindParam(':idEventos', $idEventos);				
 			$insert->bindParam(':valorDiaria', $valorDiaria);				
 			$ress = $insert->execute();
-			$lastIdAparelhosContrato = $pdo->lastInsertId();
-			
-			
+			$lastIdAparelhosContrato = $pdo->lastInsertId();	
 
 			
 			if($ress){	
@@ -179,16 +174,8 @@
 								$totalIdItens = $stmt->rowCount();	
 
 
-								if($totalIdItens > 0 ){ // se existir itens para esse evento, não deixa cadastrar
+								if($totalIdItens == 0 ){ // se existir itens para esse evento, não deixa cadastrar
 														
-									$status = 0;			
-									$erro = "Estes itens já existem";			
-									//$retorno = array('erro'=>$erro, 'status'=>$status);			
-									//echo json_encode($retorno, JSON_PRETTY_PRINT);
-
-											
-								}else{ // se não tiver item já cadastrado, cadastra os novos
-									
 									
 									$sql = "INSERT INTO itens_contrato (idItens, idEventos, qtde) VALUES (:idItens, :idEventos, :qtde)";			
 										$insert = $pdo->prepare($sql);			
@@ -201,14 +188,24 @@
 
 										if($ress){	
 											//$pdo->commit();
+											
+											$erro = ($count > 1) ? "Itens cadastrados com sucesso" : "Item cadastrado com sucesso";
 											$status = 1;	
-											$erro = "Itens cadastrados com sucesso";
+
 										}else{
 											//$pdo->rollBack(); /* Desfaz a inserção na tabela de movimentos em caso de erro na query da tabela conta */
 											$status = 0;					
 											$erro = "Erro ao cadastrar itens";
 											return false;	
-										}									
+										}										
+
+											
+								}else{ // se não tiver item já cadastrado, cadastra os novos
+									
+									
+									$status = 1;			
+									$erro = "Parece que um ou mais itens já foram adicionados a este evento. Eles não serão duplicados. Os novos itens serão adicionado normalmente. Caso queira mudar a quantidade de um item já inserido, utilize o formulário de edição de Itens do Contrato";			
+					
 
 								}
 								
@@ -258,6 +255,7 @@
 			$retorno = array('erro'=>$erro, 'status'=>$status);										
 			echo json_encode($retorno, JSON_PRETTY_PRINT);	
 			
+		
 		} catch (PDOException $e) {						
 				$status = 0;			
 				$erro = $e->getMessage();			

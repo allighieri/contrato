@@ -83,7 +83,7 @@ $sql= "SELECT
                 <th>Email</th>
                 <th>CPF/CNPJ</th>
                 <th>Bairro</th>
-                <th>Data</th>
+                <th>Cadastro</th>
                 <th>Hora</th>
                 <th>Ação</th>
              </tr>
@@ -99,23 +99,24 @@ $sql= "SELECT
 			
 			foreach($linhasCliente as $linhasCliente){ ?>
 			<tr>
-                <td><?php echo $linhasCliente['nome']; ?></td>
+                <td style="white-space:normal !important;"><?php echo $linhasCliente['nome']; ?></td>
                 <td><a href="https://api.whatsapp.com/send?phone=+55<?php echo limpaCelular($linhasCliente['telefone']);?>" target="_blank" title="Entrar em contato pelo WhatsApp"><?php echo $linhasCliente['telefone']; ?></a></td>
                 <td><a href="mailto:<?php echo $linhasCliente['email']; ?>" title="Enviar um e-mail para <?php echo $linhasCliente['email']; ?>" alt="Enviar um email para <?php echo $linhasCliente['email']; ?>"><?php echo $linhasCliente['email']; ?></a></td>
                 <td><?php echo $linhasCliente['cpf_cnpj']; ?></td>
                 <td><?php echo $linhasCliente['bairro']; ?></td>
- 				<td><?php echo utf8_encode(strftime("%d/%m/%Y", strtotime($linhasCliente['data']))); ?></td>
-                <td>
+ 				<td style="text-align:center;"><?php echo utf8_encode(strftime("%d/%m/%Y", strtotime($linhasCliente['data']))); ?></td>
+                <td style="text-align:center;">
 					<?php 
 						$agora = new DateTime(utf8_encode($linhasCliente['data'])); // Pega o momento atual
 						echo $agora->format('H:i'); // Exibe no formato desejado					
 					?>
-				</td>				<td>
+				</td>				
+				<td style="text-align:center;">
 					<a href="form_editar_cliente.php?id=<?php echo $linhasCliente['idCliente'] ;?>&cpf=<?php echo $linhasCliente['cpf_cnpj']; ?>" title="Editar">
 						<i class="fa fa-pencil-square-o" aria-hidden="true"></i></a> |
 					
-					<a href="gerar_contrato.php" title="Gerar" target="_blank">
-						<i class="fa fa-html5" aria-hidden="true"></i></a> |
+					<a href="detalhes.php?id=<?php echo $linhasCliente['idCliente'] ;?>" title="Detalhes" target="_blank">
+						<i class="fa fa-list-ul" aria-hidden="true"></i></a> |
 					
 					<a href="cliente.php?id=<?php echo $linhasCliente['idCliente'] ;?>&acao=deletar" title="Deletar">
 						<i class="fa fa-trash" aria-hidden="true"></i></td></a>

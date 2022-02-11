@@ -76,15 +76,15 @@ $sql= "SELECT * FROM itens";
 			foreach($linhasItens as $itens){ ?>
 			<tr>
 				<td><?php echo $itens['idItens']; ?></td>
-                <td><?php echo $itens['descricao']; ?></td>
+                <td style='white-space:normal !important;'><?php echo $itens['descricao']; ?></td>
                 <td><?php echo $itens['qtde']; ?></td>
                 <td><?php echo $itens['padrao'] == 1 ? "Sim":"Não"; ?></td>
 				<td>
 					<a href="form_editar_itens.php?id=<?php echo $itens['idItens'] ;?>" title="Editar">
 						<i class="fa fa-pencil-square-o" aria-hidden="true"></i></a> |
 					
-					<a href="gerar_contrato.php?id=<?php echo $itens['idItens'] ;?>" title="Gerar" target="_blank">
-						<i class="fa fa-html5" aria-hidden="true"></i></a> |
+					<a href="detalhes.php?id=<?php echo $itens['idItens'] ;?>" title="Detalhes" target="_blank">
+						<i class="fa fa-list-ul" aria-hidden="true"></i></a> |
 					
 					<a href="itens.php?id=<?php echo $itens['idItens'] ;?>&acao=deletar" title="Deletar">
 						<i class="fa fa-trash" aria-hidden="true"></i></td></a>
@@ -113,11 +113,9 @@ $.fn.dataTable.moment( 'L', 'pt-br' );
 		 searching: true, paging: true, info: true,
 		"dom": 'rftip', //retira relementos do Dom
         columnDefs: [
+            { responsivePriority: 1, targets: 4 },
 			{ responsivePriority: 1, targets: 0 },
 			{ targets: 0, visible: false }
-
-
-
         ],
 		 "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json"

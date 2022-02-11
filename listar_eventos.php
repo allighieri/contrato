@@ -8,10 +8,11 @@ include_once 'conn.php';
 $sql= "SELECT 
 			e.idEventos,
 			e.idCliente,
-			e.endereco,
+			e.endereco as endEvento,
 			e.bairro,
 			e.cidade,
 			e.uf,
+			e.cep as cepFesta,
 			e.instalacao,
 			e.retirada,
 			e.idStatus,
@@ -34,7 +35,14 @@ $sql= "SELECT
 		$stmt = $pdo->prepare($sql);	
 		$stmt->execute();	
 		$total = $stmt->rowCount();	
-		$linhasEventos = $stmt->fetchAll();		
+		$linhasEventos = $stmt->fetchAll();	
+
+
+
+
+
+
+		
 		
 ?>
 <!DOCTYPE html>
@@ -91,7 +99,6 @@ $sql= "SELECT
                 <th>Nome</th>
                 <th>Telefone</th>
                 <th>Bairro</th>
-                <th>Cidade</th>
                 <th>Instalacao</th>
                 <th>Hora</th>
                 <th>Retirada</th>
@@ -111,32 +118,31 @@ $sql= "SELECT
 			
 			foreach($linhasEventos as $eventos){ ?>
 			<tr>
-				<td><?php echo $eventos['nome']; ?></td>
+				<td style="white-space:normal !important;"><?php echo $eventos['nome']; ?></td>
                 <td><a href="https://api.whatsapp.com/send?phone=+55<?php echo limpaCelular($eventos['telefone']);?>" target="_blank" title="Entrar em contato pelo WhatsApp"><?php echo $eventos['telefone']; ?></a></td>
                 <td><?php echo $eventos['bairro']; ?></td>
-                <td><?php echo $eventos['cidade']; ?></td>
-                <td><?php echo utf8_encode(strftime("%d/%m/%Y", strtotime($eventos['instalacao']))); ?></td>
-                <td>
+                <td style="text-align:center;"><?php echo utf8_encode(strftime("%d/%m/%Y", strtotime($eventos['instalacao']))); ?></td>
+                <td style="text-align:center;">
 					<?php 
 						$instalacaohora = new DateTime(utf8_encode($eventos['instalacao'])); // Pega o momento atual
 						echo $instalacaohora->format('H:i'); // Exibe no formato desejado					
 					?>
 				</td>
 				
-                <td><?php echo utf8_encode(strftime("%d/%m/%Y", strtotime($eventos['retirada']))); ?></td>
-                <td>
+                <td style="text-align:center;"><?php echo utf8_encode(strftime("%d/%m/%Y", strtotime($eventos['retirada']))); ?></td>
+                <td style="text-align:center;">
 					<?php 
 						$retiradahora = new DateTime(utf8_encode($eventos['retirada'])); // Pega o momento atual
 						echo $retiradahora->format('H:i'); // Exibe no formato desejado					
 					?>
 				</td>
 				<td><?php echo $eventos['nomeStatus']; ?></td>
-				<td>
+				<td style="text-align:center;">
 					<a href="form_editar_eventos.php?id=<?php echo $eventos['idEventos'] ;?>" title="Editar">
 						<i class="fa fa-pencil-square-o" aria-hidden="true"></i></a> |
-					
-					<a href="gerar_contrato.php?id=<?php echo $eventos['idEventos'] ;?>" title="Gerar" target="_blank">
-						<i class="fa fa-html5" aria-hidden="true"></i></a> |
+						
+					<a href="detalhes.php?id=<?php echo $eventos['idEventos'] ;?>" title="Detalhes" target="_blank">
+						<i class="fa fa-list-ul" aria-hidden="true"></i></a> |						
 					
 					<a href="eventos.php?id=<?php echo $eventos['idEventos'] ;?>&acao=deletar" title="Deletar">
 						<i class="fa fa-trash" aria-hidden="true"></i></td></a>

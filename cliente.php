@@ -481,7 +481,7 @@
 		
 		// Verifica se tem algum valor nulo		
 		if ( empty ( $valor ) ) {			
-			$erro = 'Existem campos em branco.';		
+			$erro = 'Existem campos em brancos.';		
 		}	
 	}			
 		

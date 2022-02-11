@@ -11,6 +11,8 @@
 	       		</ul>
 			</li>
 		<li><a href="listar_itens.php">Itens</a></li>
+		<li><a href="listar_aparelhos.php">Videokês</a></li>
+		<li><a href="listar_status.php">Status</a></li>
 		<li><a href="listar_templates.php" title="Gerenciar lista de templates">Templates</a></li>
 	</ul>
 </nav>

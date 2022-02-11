@@ -81,7 +81,7 @@
 
 
 			<div class="label-float">
-				<input id="endereco" type="text" name="endereco" value="<?php echo isset($final_data['ENDEREÇO']) ? $final_data['ENDEREÇO'] : ""; ?>" placeholder=" "/>
+				<input id="endereco" type="text" name="endereco" value="<?php echo isset($final_data['ENDEREÇO RESIDENCIAL']) ? $final_data['ENDEREÇO RESIDENCIAL'] : ""; ?>" placeholder=" "/>
 				 <label>Endereço</label>
 			</div>
 			

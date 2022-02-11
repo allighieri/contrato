@@ -115,6 +115,8 @@
 
 <script>
 
+$('#valorDiaria').mask('#.##0,00', {reverse: true});
+
  //faz a busca pelo nome e coloca o cpf
  $('.list_group').css('display', 'none');
 
@@ -184,10 +186,7 @@
 	
 		$(this).next().attr('data-qtde', valor); 
 		
-			if(valor < 1){
-				$(".status").fadeTo(100, 0.85).html('<span class="danger"><p>Por favor, informe um valor igual ou maior que 1.</p><span class="fechar">X</span></span>');
-				$('.fechar').on('click', function(){ $('.status').fadeOut("slow"); });					
-			};
+
   
 	});
 
@@ -209,7 +208,7 @@
 	   		qtde.push($(this).attr('data-qtde'));
 			
 			if(qtde < 1){
-				$(".status").fadeTo(100, 0.85).html('<span class="danger"><p>Por favor informe um valor igual ou maior que 1.</p><span class="fechar">X</span></span>');
+				$(".status").fadeTo(100, 0.85).html('<span class="danger"><p>Por favor informe um valor igual ou maior que 1 para a quantidade dos itens.</p><span class="fechar">X</span></span>');
 				$('.fechar').on('click', function(){ $('.status').fadeOut("slow"); });
 				return false;				
 			};			
@@ -234,8 +233,8 @@
 		
 		
 
-		if(qtde < 1){
-			$(".status").fadeTo(100, 0.85).html('<span class="danger"><p>Por favor informe um valor igual ou maior que 1.</p><span class="fechar">X</span></span>');
+		if(qtde < 1 || qtde == ''){
+			$(".status").fadeTo(100, 0.85).html('<span class="danger"><p>Por favor informe um valor igual ou maior que 1 para quantidade de itens.</p><span class="fechar">X</span></span>');
 			$('.fechar').on('click', function(){ $('.status').fadeOut("slow"); });
 			return false;				
 		};		

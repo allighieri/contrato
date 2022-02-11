@@ -20,6 +20,27 @@
 		$total = $stmt->rowCount();	
 		$linhasAparelhos = $stmt->fetchAll();	
 		
+	
+	
+	//BUSCA O NOME DO CLIENTE PARA O EVENTO
+	$sql= "SELECT 
+			c.idCliente, 
+			c.nome,
+			e.idEventos,
+			e.idCliente
+			FROM cliente as c 
+			INNER JOIN eventos as e ON c.idCliente = e.idCliente
+			WHERE e.idEventos = :idEventos
+		";
+		$cliente = $pdo->prepare($sql);	
+		$cliente->bindParam(':idEventos', $idEventos, PDO::PARAM_INT);				
+		$cliente->execute();	
+		$total = $cliente->rowCount();	
+		$linhasCliente = $cliente->fetch();	
+
+		
+		
+		
 	$idAparelhos = isset($_GET['idAparelhos']) ? $_GET['idAparelhos'] : ""; 
 	
 
@@ -80,19 +101,7 @@
 		$instalacao = new DateTime(utf8_encode($linhasItensEventos['instalacao'])); // Pega o momento atual
 		
 		
-	$sql= "SELECT
-				ic.idItensContrato,
-				ic.idItens,
-				ic.idEventos,
-				ic.qtde
-			FROM itens_contrato as ic
-			WHERE ic.idEventos = :idEventos
-		";	
-		$linhasItensEv = $pdo->prepare($sql);	
-		$linhasItensEv->bindParam(':idEventos', $idEventos, PDO::PARAM_INT);	
-		$linhasItensEv->execute();	
-		$total = $linhasItensEv->rowCount();	
-		$linhasItensEv = $linhasItensEv->fetchAll();	
+
 		
 
 
@@ -124,25 +133,15 @@
 		<form id="form_insere_evento" name="form" autocomplete="off">
 			<h2>Editar Itens para:</h2>
 			
-			<input id="idEventos" type="hidden" name="idEventos" value=""/>
-
-			
-			<div class="label-float">
-				<input type="text" id="gsearchsimple" name="gsearchsimple" value="<?php echo $linhasItensEventos['nome']; ?>" placeholder="Search..." />
-				<label>Evento (Nome Cliente)</label>
-				<ul class="list_group">
-
-				</ul>
-				<div id="localSearchSimple"></div>			
-			</div>
-			
+			<input id="idEventos" type="hidden" name="idEventos" value="<?php echo $idEventos; ?>"/>
+			<input id="acao" type="hidden" name="acao" value="editar" placeholder=" "/>
 
 			<div class="label-float">
-				<input id="dataInstalacao" type="text" name="dataInstalacao" value="<?php echo $instalacao->format('d/m/Y'.' à\s '.'H:i'); ?>" placeholder=" " disabled />
-				 <label>Data Instalação</label>
-				 <span class="check"></span>
+				<input id="cliente" type="text" name="cliente" value="<?php echo $linhasCliente['nome'];?>" placeholder=" " disabled />
+				 <label>Evento (nome do cliente)</label>
 			</div>
-			
+
+
 			<div class="label-float">
 				<input id="valorDiaria" type="text" name="valorDiaria" value="<?php echo $linhasAparelhosContrato['valorDiaria']; ?>" placeholder=" "  />
 				 <label>Valor da diária</label>
@@ -161,14 +160,26 @@
 
 			<h2>Itens</h2>
 			<div class="checkbox">
-				<?php foreach($linhasItens as $linhasItens){ ?>
+				<?php foreach($linhasItens as $linhasItens){ 
+				
+				
+				//Verifica se tem algum item 
+				$sql= "SELECT *	FROM itens_contrato WHERE idEventos = :idEventos AND idItens = :idItens";	
+					$linhasItensEv = $pdo->prepare($sql);	
+					$linhasItensEv->bindParam(':idEventos', $idEventos, PDO::PARAM_INT);	
+					$linhasItensEv->bindParam(':idItens', $linhasItens['idItens'], PDO::PARAM_INT);	
+					$linhasItensEv->execute();	
+					$total = $linhasItensEv->rowCount();	
+					$linhasItensEv = $linhasItensEv->fetch();
+
+				?>
 
 
 					<div>
 						<span>Qtde: </span>
-						<input type="text" id="qtde<?php echo $linhasItens['idItens'] ;?>" name="qtde[]" value="<?php echo $linhasItens['qtde']; ?>" />					
+						<input type="text" id="qtde<?php echo $linhasItens['idItens'] ;?>" name="qtde[]" value="<?php echo isset($linhasItensEv['idItens']) ? $linhasItensEv['qtde'] : $linhasItens['qtde']; ?>" />					
 						
-						<input type="checkbox" data-qtde="<?php echo $linhasItens['qtde']; ?>" id="itens_contrato<?php echo $linhasItens['idItens']; ?>" name="itens[]" value="<?php echo $linhasItens['idItens']; ?>" <?php echo $linhasItens['padrao'] == 1 ? "checked" : ""; ?> />
+						<input type="checkbox" data-qtde="<?php echo isset($linhasItensEv['idItens']) ? $linhasItensEv['qtde'] : $linhasItens['qtde']; ?>" id="itens_contrato<?php echo $linhasItens['idItens']; ?>"name="itens[]" value="<?php echo $linhasItens['idItens']; ?>" <?php echo isset($linhasItensEv['idItens']) ? "checked" : ""; ?> />
 						<span class="desc"><label class="for" for="itens_contrato<?php echo $linhasItens['idItens']; ?>"><?php echo $linhasItens['descricao']; ?></label></span>
 
 					</div>	
@@ -195,67 +206,8 @@
 
 <script>
 
- //faz a busca pelo nome e coloca o cpf
- $('.list_group').css('display', 'none');
+$('#valorDiaria').mask('#.##0,00', {reverse: true});
 
- $('#gsearchsimple').keyup(function(){
-  var query = $('#gsearchsimple').val();
-  
-  $('#dataInstalacao').val('');
-  
-  if(query.length == 1)
-  {
-   
-	$('.list_group').css('display', 'block');
-
-   $.ajax({
-		url:"consulta_eventos.php",
-		method:"POST",
-		data:{query:query},
-		success:function(data)
-		{
-		 $('.list_group').html(data);
-		}
-   })
-   
-  
-  }
-  if(query.length == 0)
-  {
-   $('.list_group').css('display', 'none');
-  }
- });
-
- $('#localSearchSimple').jsLocalSearch({
-  mincaracteres: 1,
-  action:"Show",
-  html_search:true,
-  mark_text:"marktext"
- });
-
- $(document).on('click', '.gsearch', function(){
-  
-  var nome = $(this).text();
-  var attr = $(this).attr('data-id');
-  
-  $('#gsearchsimple').val(nome);
-  $('.list_group').css('display', 'none');
-  
-  
-
-  $.ajax({
-   url:"consulta_eventos.php",
-   method:"POST",
-   data:{attr:attr},
-   success:function(data)
-   {
-	$('#dataInstalacao').val(data);
-	$('#idEventos').val(attr);
-   }
-  })
-
-  
- });
 
 	//Busca a quantidade de cada item toda vez que são modificados e adiciona no atributo data-qtde do campo de descrição de itens
 	$("input[name='qtde[]']").on('keyup',function(){
@@ -264,10 +216,7 @@
 	
 		$(this).next().attr('data-qtde', valor); 
 		
-			if(valor < 1){
-				$(".status").fadeTo(100, 0.85).html('<span class="danger"><p>Por favor, informe um valor igual ou maior que 1.</p><span class="fechar">X</span></span>');
-				$('.fechar').on('click', function(){ $('.status').fadeOut("slow"); });					
-			};
+
   
 	});
 
@@ -296,8 +245,6 @@
 			
 
 		});	
-		
-		
 
 		
 		var idAparelhos = $('input[name="aparelhos"]:checked').val();
@@ -305,7 +252,9 @@
 		var valorDiaria = $('#valorDiaria').val();
 		var valorDiaria = valorDiaria.trim();
 		var idEventos = idEventos.trim();
-
+		
+		var acao = $('#acao').val();
+		var acao = acao.trim();
 
 		console.log(qtde);
 		console.log(idItens);
@@ -315,11 +264,11 @@
 		
 
 		if(qtde < 1){
-			$(".status").fadeTo(100, 0.85).html('<span class="danger"><p>Por favor informe um valor igual ou maior que 1.</p><span class="fechar">X</span></span>');
+			$(".status").fadeTo(100, 0.85).html('<span class="danger"><p>Por favor informe um valor igual ou maior que 1 para quantidade dos itens.</p><span class="fechar">X</span></span>');
 			$('.fechar').on('click', function(){ $('.status').fadeOut("slow"); });
 			return false;				
-		};		
-		
+		};	
+
 		if(idEventos == ''){
 			$(".status").fadeTo(100, 0.85).html('<span class="danger"><p>Escolha um evento para inserir os itens.</p><span class="fechar">X</span></span>');
 			$('.fechar').on('click', function(){ $('.status').fadeOut("slow"); });
@@ -337,7 +286,7 @@
 		$.ajax({
 			url: 'itens_contrato.php',
 			type: "POST",
-			data: {'idItens':idItens, 'qtde':qtde, 'idEventos':idEventos, 'idAparelhos':idAparelhos, 'valorDiaria':valorDiaria},
+			data: {'idItens':idItens, 'qtde':qtde, 'idEventos':idEventos, 'idAparelhos':idAparelhos, 'valorDiaria':valorDiaria, 'acao':acao},
 			beforeSend: function() {
 				$('#carregando').html(iconCarregando); 
 			},

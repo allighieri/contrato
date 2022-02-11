@@ -11,10 +11,11 @@ $idEventos = $_GET['id'];
 $sql= "SELECT 
 			e.idEventos,
 			e.idCliente,
-			e.endereco,
+			e.endereco as endEvento,
 			e.bairro,
 			e.cidade,
 			e.uf,
+			e.cep as cepFesta,
 			e.instalacao,
 			e.retirada,
 			e.idStatus,
@@ -71,7 +72,7 @@ $sql= "SELECT
 	</header>	
 	
 	<section>
-		
+	
 		<form id="form_insere_evento" name="form" autocomplete="off">
 			<h2>Editando Evento para:</h2>
 			
@@ -89,12 +90,12 @@ $sql= "SELECT
 			<h2>Dados do Evento</h2>
 
 			<div class="label-float">
-				<input id="cep" type="text" name="cep" value="<?php echo $linhasEventos['cep']; ?>" placeholder=" "/>
+				<input id="cep" type="text" name="cep" value="<?php echo $linhasEventos['cepFesta']; ?>" placeholder=" "/>
 				 <label>CEP</label>
 			</div>
 
 			<div class="label-float">
-				<input id="endereco" type="text" name="endereco" value="<?php echo $linhasEventos['endereco']; ?>" placeholder=" "/>
+				<input id="endereco" type="text" name="endereco" value="<?php echo $linhasEventos['endEvento']; ?>" placeholder=" "/>
 				 <label>Endereço</label>
 			</div>
 		
@@ -174,7 +175,24 @@ $sql= "SELECT
 
 <script>
 
+$(document).ready(function(){
+	// Pega a data do atributo Date do html 5 no campo selecionado para a instalacao e adiciona 1 dia para a data de retirada	
+    //$('.instalacao')[0].valueAsDate = new Date();
+    $('#instalacao').on('change',function() {
+      var date = this.valueAsDate;
+      date.setDate(date.getDate() + 1);
+      $('#retirada')[0].valueAsDate = date;
+    });
+
+	//Coloca a mesma hora de instalação para a retirada
+	$('#horainstalacao').on('change',function(){
+		var horaInst = $(this).val();
+		$('#horaretirada').val(horaInst);
+	});
+
 	$("#cep").mask("00.000-000");
+
+});
 
 	//INSERE EVENTO
 	$(document).on('submit','#form_insere_evento',function(){

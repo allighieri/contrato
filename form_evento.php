@@ -145,7 +145,6 @@
 
 			<div class="label-float">
 				<input id="idStatus" type="hidden" name="idStatus" value="1" placeholder=" "/>
-				 <label>Status</label>
 			</div>
 			
 
@@ -172,6 +171,22 @@
 
 
 $(document).ready(function(){
+	
+	
+	// Pega a data do atributo Date do html 5 no campo selecionado para a instalacao e adiciona 1 dia para a data de retirada	
+    //$('.instalacao')[0].valueAsDate = new Date();
+    $('#instalacao').on('change',function() {
+      var date = this.valueAsDate;
+      date.setDate(date.getDate() + 1);
+      $('#retirada')[0].valueAsDate = date;
+    });
+
+	//Coloca a mesma hora de instalação para a retirada
+	$('#horainstalacao').on('change',function(){
+		var horaInst = $(this).val();
+		$('#horaretirada').val(horaInst);
+	});
+	
 	
 	//Função que mascara CPF ou CNPJ
 	

@@ -59,7 +59,7 @@ include_once 'conn.php';
 		
 	<a href="form_cadastrar_template.php" class="btn_cadastrar_novo" title="Cadastrar um novo template">NOVO TEMPLATE</a>
 	<div class="clear"></div>
-	<?php echo (isset($_GET['status']) ? $_GET['status'] : "" );?>
+	<?php echo (isset($_GET['status']) ? $_GET['status']."<br /><br /><br />" : "" );?>
 		
 <table id="example" class="display nowrap" style="width:100%">
         <thead>
@@ -75,8 +75,8 @@ include_once 'conn.php';
 			<tr>
                 <td><?php echo $linhasTemplate['idTemplate']; ?></td>
                 <td><?php echo $linhasTemplate['nomeTemplate']; ?></td>
-				<td><?php echo utf8_encode(strftime("%d/%m/%Y", strtotime($linhasTemplate['data']))); ?></td>
-				<td>
+				<td style="text-align:center;"><?php echo utf8_encode(strftime("%d/%m/%Y", strtotime($linhasTemplate['data']))); ?></td>
+				<td style="text-align:center;">
 					<a href="form_editar_template.php?id=<?php echo $linhasTemplate['idTemplate'] ;?>" title="Editar">
 						<i class="fa fa-pencil-square-o" aria-hidden="true"></i></a> |
 					<a href="gerar_template.php?id=<?php echo $linhasTemplate['idTemplate'] ;?>" title="Gerar">
